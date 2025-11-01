@@ -9,7 +9,11 @@ module dolphinder_profiles::dolphinder_profiles;
 
 module dolphinder_profiles::profiles {
     use std::string::{String};
+    use sui::table::{Self, Table};
     use std::vector;
+    use sui::event;
+
+    const EDuplicateVote: u64 = 1;
 
     /// Profile structure for builder information
     public struct Dashboard has key, store{
@@ -50,7 +54,9 @@ module dolphinder_profiles::profiles {
         description: String,
         github_link: String,
         youtube_link: String,
-        img_prj_blods_id: String
+        img_prj_blods_id: String,
+        voters: Table<address, bool>,
+        vote_count: u64
     }
 
     public struct Certificate has key, store {
@@ -146,10 +152,21 @@ module dolphinder_profiles::profiles {
             github_link ,
             img_prj_blods_id,
             youtube_link,
+            voters: table::new(ctx),
+            vote_count: 0
         };
         vector::push_back(&mut profile.list_projects, project.id.to_inner());
         transfer::public_transfer(project, tx_context::sender(ctx));
     }
+
+    public fun vote (project: &mut Project, vote_yes: bool, ctx: &mut TxContext){
+        assert!(project.voters.contains(ctx.sender()), EDuplicateVote);
+        if(vote_yes){
+            project.vote_count = project.vote_count + 1;
+        };
+        table::add(&mut project.voters, ctx.sender(), vote_yes);
+    }
+
 
     public fun profile_owner(profile: &Profile): address {
         profile.owner

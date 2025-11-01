@@ -11,7 +11,7 @@ import { Button } from "../components/shared/Button";
 import { useProfileQuery } from "../hooks/useProfileQuery";
 import { useProjectQuery } from "../hooks/useProjectQuery";
 import { useCertificateQuery } from "../hooks/useCertificateQuery";
-import SimpleSilk from "../components/SimpleSilk";
+import SimpleSilk from "../components/react-bits/SimpleSilk";
 
 const Profile = () => {
   const currentAccount = useCurrentAccount();
@@ -20,19 +20,14 @@ const Profile = () => {
   const [showAddCertificateForm, setShowAddCertificateForm] = useState(false);
   const [profileId, setProfileId] = useState<string>("");
   
-  // Get profile data which includes list of project IDs
   const { profile, refetch: refetchProfile } = useProfileQuery(address || "");
   
-  // Get project IDs from profile
   const projectIds = profile?.list_projects || [];
   
-  // Fetch projects using the project IDs
   const { projects, isLoading: isProjectsLoading, refetch: refetchProjects } = useProjectQuery(projectIds);
   
-  // Get certificate IDs from profile
   const certificateIds = profile?.list_certificates || [];
   
-  // Fetch certificates using the certificate IDs
   const { certificates, isLoading: isCertificatesLoading, refetch: refetchCertificates } = useCertificateQuery(certificateIds);
 
 

@@ -1,6 +1,6 @@
 import React from "react";
 import DeveloperBubbles from "../components/DeveloperBubbles";
-import SimpleSilk from "../components/SimpleSilk";
+import SimpleSilk from "../components/react-bits/SimpleSilk";
 
 const HomePage: React.FC = () => {
   return (

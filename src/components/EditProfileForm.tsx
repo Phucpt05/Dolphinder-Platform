@@ -28,7 +28,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ initialData, onClose,
   );
   
   const currentAccount = useCurrentAccount();
-  const { mutateAsync: signAndExecute } = useSignAndExecuteTransaction();
+  const { mutateAsync: signAndExecute, reset } = useSignAndExecuteTransaction();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { success, error } = useToast();
 
@@ -89,7 +89,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ initialData, onClose,
             console.log("Profile transaction successful, calling onSuccess");
             success("Profile created successfully!");
             onClose();
-            // Call the parent onSuccess callback to refetch data
+            reset();
             onSuccess?.();
           },
           onError: (transactionError: Error) => {

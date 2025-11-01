@@ -1,4 +1,4 @@
-import SimpleSilk from "../components/SimpleSilk";
+import SimpleSilk from "../components/react-bits/SimpleSilk";
 import { useAllProfilesQuery } from "../hooks/useAllProfilesQuery";
 import OnchainProfileCard from "../components/OnchainProfileCard";
 

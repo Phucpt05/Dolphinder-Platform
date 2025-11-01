@@ -30,7 +30,7 @@ const AddProjectForm: React.FC<AddProjectFormProps> = ({ onClose, profileId, onS
   };
 
   const currentAccount = useCurrentAccount();
-  const { mutateAsync: signAndExecute } = useSignAndExecuteTransaction();
+  const { mutateAsync: signAndExecute, reset } = useSignAndExecuteTransaction();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { success, error } = useToast();
 
@@ -83,7 +83,7 @@ const AddProjectForm: React.FC<AddProjectFormProps> = ({ onClose, profileId, onS
             console.log("Project transaction successful, calling onSuccess");
             success("Project created successfully!");
             onClose();
-            // Call the parent onSuccess callback to refetch data
+            reset();
             onSuccess?.();
           },
           onError: (transactionError: Error) => {

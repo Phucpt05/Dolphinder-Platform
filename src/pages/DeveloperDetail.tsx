@@ -2,7 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, Github, Linkedin, Globe, Copy } from "lucide-react";
 import { getDeveloperByUsername, type Dev } from "../data/loadDevs";
 import { useEffect, useState } from "react";
-import SimpleSilk from "../components/SimpleSilk";
+import SimpleSilk from "../components/react-bits/SimpleSilk";
 
 const DeveloperDetail: React.FC = () => {
   const { username } = useParams<{ username: string }>();

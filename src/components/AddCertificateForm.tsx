@@ -25,7 +25,7 @@ const AddCertificateForm: React.FC<AddCertificateFormProps> = ({ onClose, profil
   });
 
   const currentAccount = useCurrentAccount();
-  const { mutateAsync: signAndExecute } = useSignAndExecuteTransaction();
+  const { mutateAsync: signAndExecute, reset } = useSignAndExecuteTransaction();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { success, error } = useToast();
 
@@ -85,7 +85,7 @@ const AddCertificateForm: React.FC<AddCertificateFormProps> = ({ onClose, profil
             console.log("Certificate transaction successful, calling onSuccess");
             success("Certificate created successfully!");
             onClose();
-            // Call the parent onSuccess callback to refetch data
+            reset();
             onSuccess?.();
           },
           onError: (transactionError: Error) => {

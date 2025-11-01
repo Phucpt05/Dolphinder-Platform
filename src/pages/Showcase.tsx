@@ -1,4 +1,4 @@
-import SimpleSilk from "../components/SimpleSilk";
+import SimpleSilk from "../components/react-bits/SimpleSilk";
 
 const Showcase: React.FC = () => {
   return (

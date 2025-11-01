@@ -1,7 +1,7 @@
 import { Github, Globe, Linkedin } from "lucide-react";
 import { loadDevelopers, type Dev } from "../data/loadDevs";
 import { useEffect, useState } from "react";
-import SimpleSilk from "../components/SimpleSilk";
+import SimpleSilk from "../components/react-bits/SimpleSilk";
 
 const Developers: React.FC = () => {
   const [developers, setDevelopers] = useState<Dev[]>([]);

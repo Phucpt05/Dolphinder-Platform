@@ -40,6 +40,7 @@ export interface ProjectFormData {
     youtubeLink: string;
     img_prj_blods_id: string;
     imageUrl?: string;
+    
 }
 
 // Project data structure from blockchain/backend
