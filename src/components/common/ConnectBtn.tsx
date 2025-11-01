@@ -19,6 +19,7 @@ const ConnectBtn = () => {
   const { open } = useModalStore();
   const { mutate: disconnectWallet } = useDisconnectWallet();
   const account = useCurrentAccount();
+  const { success } = useToast();
 
   if (account) {
     return (
@@ -35,7 +36,13 @@ const ConnectBtn = () => {
             </a>
           </DropdownMenuItem>
           <DropdownMenuItem className="text-white hover:bg-white/10 hover:text-white focus:bg-white/10 focus:text-white cursor-pointer">
-            <p className="flex items-center gap-2 w-full" onClick={() => disconnectWallet()}>
+            <p className="flex items-center gap-2 w-full" onClick={() => {
+              disconnectWallet(undefined, {
+                onSuccess: () => {
+                  success('Wallet disconnected successfully!');
+                }
+              });
+            }}>
               <span className="text-red-400">🔌</span> Disconnect
             </p>
           </DropdownMenuItem>

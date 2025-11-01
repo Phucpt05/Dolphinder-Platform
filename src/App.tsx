@@ -6,6 +6,7 @@ import { ToastProvider } from "./components/providers/ToastProvider";
 import HomePage from "./pages/HomePage";
 import Learn from "./pages/Learn";
 import Developers from "./pages/Developers";
+import DevelopersOnchain from "./pages/DevelopersOnchain";
 import Community from "./pages/Community";
 import Showcase from "./pages/Showcase";
 import DeveloperDetail from "./pages/DeveloperDetail";
@@ -20,7 +21,8 @@ const App: React.FC = () => {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/learn" element={<Learn />} />
-            <Route path="/developers" element={<Developers />} />
+            <Route path="/developers-onchain" element={<DevelopersOnchain />} />
+            <Route path="/developers-offchain" element={<Developers />} />
             <Route path="/community" element={<Community />} />
             <Route path="/showcase" element={<Showcase />} />
             <Route path="/:username" element={<DeveloperDetail />} />

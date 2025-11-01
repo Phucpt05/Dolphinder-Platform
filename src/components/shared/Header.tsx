@@ -10,7 +10,11 @@ const baseNavItems = [
   },
   {
     label: "Developers",
-    href: "/developers",
+    href: "/developers-onchain",
+  },
+  {
+    label: "All Developers",
+    href: "/developers-offchain",
   },
   {
     label: "Community",

@@ -1,4 +1,4 @@
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 import toast, { Toaster, ToastPosition } from 'react-hot-toast';
 
 interface ToastContextType {
@@ -23,10 +23,33 @@ interface ToastProviderProps {
   position?: ToastPosition;
 }
 
-export const ToastProvider: React.FC<ToastProviderProps> = ({ 
-  children, 
-  position = 'top-right' 
+export const ToastProvider: React.FC<ToastProviderProps> = ({
+  children,
+  position = 'top-right'
 }) => {
+  useEffect(() => {
+    // Add a global click handler to dismiss toasts when clicked
+    const handleGlobalClick = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      // Check if the clicked element is a toast notification
+      // react-hot-toast uses div elements with specific classes
+      if (target.closest('[data-testid="toast"]') ||
+          target.closest('[role="status"]') ||
+          target.closest('[role="alert"]') ||
+          target.closest('.toast') ||
+          target.closest('[class*="toast"]') ||
+          target.classList.contains('toast-clickable') ||
+          target.closest('.toast-clickable')) {
+        toast.dismiss();
+      }
+    };
+
+    document.addEventListener('click', handleGlobalClick);
+    
+    return () => {
+      document.removeEventListener('click', handleGlobalClick);
+    };
+  }, []);
   const success = (message: string) => {
     return toast.success(message, {
       duration: 4000,
@@ -38,6 +61,8 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
         borderRadius: '0.5rem',
         padding: '12px 16px',
         fontSize: '14px',
+        cursor: 'pointer',
+        userSelect: 'none',
       },
       iconTheme: {
         primary: '#fff',
@@ -48,7 +73,7 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
 
   const error = (message: string) => {
     return toast.error(message, {
-      duration: 5000,
+      duration: 2000,
       position,
       style: {
         background: '#ef4444',
@@ -57,6 +82,8 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
         borderRadius: '0.5rem',
         padding: '12px 16px',
         fontSize: '14px',
+        cursor: 'pointer',
+        userSelect: 'none',
       },
       iconTheme: {
         primary: '#fff',
@@ -75,6 +102,8 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
         borderRadius: '0.5rem',
         padding: '12px 16px',
         fontSize: '14px',
+        cursor: 'pointer',
+        userSelect: 'none',
       },
     });
   };
@@ -96,6 +125,8 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
             borderRadius: '0.5rem',
             padding: '12px 16px',
             fontSize: '14px',
+            cursor: 'pointer',
+            userSelect: 'none',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
           },
           success: {
