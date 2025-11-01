@@ -1,11 +1,8 @@
 export interface SuiID {
     id: string
 }
-
-// For UI components that need string keys
 export type StringKey = string;
 
-// Profile data structure for UI components
 export interface ProfileData {
     name?: string;
     username?: string;
@@ -16,7 +13,6 @@ export interface ProfileData {
     ava_blod_id?: string;
 }
 
-// Profile data structure from blockchain/backend
 export interface Profile {
     id: SuiID,
     owner: string,
@@ -31,7 +27,6 @@ export interface Profile {
     list_certificate: Certificate[]
 }
 
-// Project data structure for UI forms
 export interface ProjectFormData {
     title: string;
     description: string;
@@ -43,7 +38,6 @@ export interface ProjectFormData {
     
 }
 
-// Project data structure from blockchain/backend
 export interface Project {
     id: SuiID,
     owner: string,
@@ -56,7 +50,6 @@ export interface Project {
     image_url?: string
 }
 
-// Certificate data structure for UI forms
 export interface CertificateFormData {
     title: string;
     organization: string;
@@ -66,7 +59,6 @@ export interface CertificateFormData {
     img_cer_blods_id: string;
 }
 
-// Certificate data structure from blockchain/backend
 export interface Certificate {
     id: SuiID,
     owner: string,
@@ -79,7 +71,6 @@ export interface Certificate {
     image_url?: string
 }
 
-// Upload related types
 export interface WalrusBlobObject {
     blobId: string;
     certifiedEpoch: null;

@@ -156,11 +156,11 @@ module dolphinder_profiles::profiles {
             vote_count: 0
         };
         vector::push_back(&mut profile.list_projects, project.id.to_inner());
-        transfer::public_transfer(project, tx_context::sender(ctx));
+        transfer::share_object(project);
     }
 
     public fun vote (project: &mut Project, vote_yes: bool, ctx: &mut TxContext){
-        assert!(project.voters.contains(ctx.sender()), EDuplicateVote);
+        assert!(!project.voters.contains(ctx.sender()), EDuplicateVote);
         if(vote_yes){
             project.vote_count = project.vote_count + 1;
         };

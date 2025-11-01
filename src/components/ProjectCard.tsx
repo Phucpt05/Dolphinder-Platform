@@ -134,7 +134,7 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
           >
             <span className="text-red-400">❤️</span>
             <span className="text-white text-sm">
-              {project.vote_count || 100}
+              {project.vote_count || 10}
             </span>
           </button>
         </div>

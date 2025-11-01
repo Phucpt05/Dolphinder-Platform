@@ -29,6 +29,7 @@ export const useProjectQuery = (projectIds: string[]) => {
       github_link: string;
       youtube_link: string;
       img_prj_blods_id: string;
+      vote_count: number;
     };
 
     return {
@@ -41,6 +42,7 @@ export const useProjectQuery = (projectIds: string[]) => {
       youtubeLink: fields.youtube_link,
       img_prj_blods_id: fields.img_prj_blods_id,
       imageUrl: fields.img_prj_blods_id ? `https://aggregator.walrus-testnet.walrus.space/v1/blobs/${fields.img_prj_blods_id}` : undefined,
+      vote_count: fields.vote_count
     };
   }).filter(Boolean) || [];
 
