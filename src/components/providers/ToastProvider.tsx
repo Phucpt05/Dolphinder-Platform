@@ -31,7 +31,6 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
     // Add a global click handler to dismiss toasts when clicked
     const handleGlobalClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      // Check if the clicked element is a toast notification
       // react-hot-toast uses div elements with specific classes
       if (target.closest('[data-testid="toast"]') ||
           target.closest('[role="status"]') ||
