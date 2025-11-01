@@ -129,13 +129,13 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ address, isOwner, onProfileId
         transition={{ duration: 0.5 }}
         className="bg-gray-800 rounded-xl p-6 mb-8 relative w-full"
       >
-        {isOwner && (
+        {isOwner && !isProfileFound && (
           <div className="absolute top-4 right-4">
             <Button
               onClick={() => setShowEditForm(true)}
               className="px-3 py-1 text-sm"
             >
-              {uiProfile.name ? "Edit Profile" : "Create Profile"}
+              Create Profile
             </Button>
           </div>
         )}
