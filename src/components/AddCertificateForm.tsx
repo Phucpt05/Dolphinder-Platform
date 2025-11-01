@@ -31,9 +31,7 @@ const AddCertificateForm: React.FC<AddCertificateFormProps> = ({ onClose, profil
 
   const handleCertificateUpload = (data: { info: WalrusResponse; mediaType: string }) => {
     // Get blob ID from the correct path in the response
-    console.log("certificateData: ", data)
     const blobId = data.info.newlyCreated?.blobObject?.blobId || "";
-    console.log("certificate blobId: ", blobId);
     setFormData(prev => ({
       ...prev,
       img_cer_blods_id: blobId

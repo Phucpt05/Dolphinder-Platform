@@ -31,22 +31,27 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
     // Add a global click handler to dismiss toasts when clicked
     const handleGlobalClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
-      // react-hot-toast uses div elements with specific classes
-      if (target.closest('[data-testid="toast"]') ||
-          target.closest('[role="status"]') ||
-          target.closest('[role="alert"]') ||
-          target.closest('.toast') ||
-          target.closest('[class*="toast"]') ||
-          target.classList.contains('toast-clickable') ||
-          target.closest('.toast-clickable')) {
+      
+      // Check if the clicked element is inside a toast
+      const toastElement = target.closest('[data-sonner-toast]') ||
+                          target.closest('[data-testid="toast"]') ||
+                          target.closest('[role="status"]') ||
+                          target.closest('[role="alert"]') ||
+                          target.closest('.toast') ||
+                          target.closest('[class*="toast"]') ||
+                          target.closest('[class*="sonner"]');
+      
+      if (toastElement) {
+        event.preventDefault();
+        event.stopPropagation();
         toast.dismiss();
       }
     };
 
-    document.addEventListener('click', handleGlobalClick);
+    document.addEventListener('click', handleGlobalClick, true);
     
     return () => {
-      document.removeEventListener('click', handleGlobalClick);
+      document.removeEventListener('click', handleGlobalClick, true);
     };
   }, []);
   const success = (message: string) => {
@@ -146,6 +151,9 @@ export const ToastProvider: React.FC<ToastProviderProps> = ({
               secondary: '#3b82f6',
             },
           },
+        }}
+        containerStyle={{
+          cursor: 'pointer',
         }}
       />
     </ToastContext.Provider>
