@@ -11,6 +11,7 @@ import Community from "./pages/Community";
 import Showcase from "./pages/Showcase";
 import DeveloperDetail from "./pages/DeveloperDetail";
 import Profile from "./pages/Profile";
+import { GgLogin } from "./pages/GgLogin";
 
 const App: React.FC = () => {
   return (
@@ -27,6 +28,7 @@ const App: React.FC = () => {
             <Route path="/showcase" element={<Showcase />} />
             <Route path="/:username" element={<DeveloperDetail />} />
             <Route path="/profile/:address" element={<Profile/>} />
+            <Route path="/gg-login" element={<GgLogin/>} />
             <Route path="*" element={<div className="text-center">Page not found!</div>} />
           </Routes>
         </main>
