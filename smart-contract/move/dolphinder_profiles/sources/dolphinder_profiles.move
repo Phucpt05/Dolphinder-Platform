@@ -11,11 +11,10 @@ module dolphinder_profiles::profiles {
     use std::string::{String};
     use sui::table::{Self, Table};
     use std::vector;
-    use sui::event;
 
     const EDuplicateVote: u64 = 1;
+    const ENotPublisher: u64 = 0;
 
-    /// Profile structure for builder information
     public struct Dashboard has key, store{
         id: UID,
         verified_profiles: vector<ID>,
@@ -178,5 +177,28 @@ module dolphinder_profiles::profiles {
 
     public fun certificate_owner(certificate: &Certificate): address {
         certificate.owner
+    }
+
+    public entry fun remove_profile(
+        dashboard: &mut Dashboard,
+        current_address: address,
+        profile: Profile,
+    ) {
+        assert!(dashboard.creator == current_address, ENotPublisher);
+        
+        let profile_id = profile.id.to_inner();
+        let mut i = 0;
+        while (i < vector::length(&dashboard.verified_profiles)) {
+            if (vector::borrow(&dashboard.verified_profiles, i) == &profile_id) {
+                vector::remove(&mut dashboard.verified_profiles, i);
+                break
+            };
+            i = i + 1;
+        };
+        
+        let Profile { id, owner: _, name: _, username: _, github: _, linkedin: _,
+                     bio: _, slushwallet: _, ava_image_blod_id: _, list_projects: _,
+                     list_certificates: _ } = profile;
+        object::delete(id);
     }
 }

@@ -16,7 +16,7 @@ interface EditProfileFormProps {
   onSuccess?: () => void;
 }
 const BACKEND_URL = "http://localhost:3001";
-
+// ultil for sponsor transaction send request to BE
 async function sponsorAndExecute({
   tx,
   suiClient,
@@ -32,7 +32,7 @@ async function sponsorAndExecute({
   allowedMoveCallTargets?: string[];
   allowedAddresses: string[];
 }) {
-  // Check if currentAccount exists
+
   if (!currentAccount) {
     throw new Error("No account connected");
   }
@@ -106,7 +106,7 @@ async function sponsorAndExecute({
   return true;
 }
 
-const EditProfileForm: React.FC<EditProfileFormProps> = ({ initialData, onClose, onSuccess }) => {
+const EditProfileForm: React.FC<EditProfileFormProps> = ({ initialData, onClose }) => {
   const [formData, setFormData] = useState<ProfileData>(
     initialData || {
       name: "",
@@ -140,57 +140,6 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ initialData, onClose,
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
-// ----------Excute transaction without sponsor gas--------
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   if (!currentAccount) {
-  //     error("Please connect your wallet first");
-  //     return;
-  //   }
-  //   if (!formData.ava_blod_id) {
-  //     error("Please upload an avatar first");
-  //     return;
-  //   }
-  //   setIsSubmitting(true);
-  //   try {
-  //     const tx = new Transaction();
-  //     tx.moveCall({
-  //       arguments: [
-  //         tx.object(DASHBOARD_ID),
-  //         tx.pure.string(formData.name || ""),
-  //         tx.pure.string(formData.username || ""),
-  //         tx.pure.string(formData.github || ""),
-  //         tx.pure.string(formData.linkedin || ""),
-  //         tx.pure.string(formData.bio || ""),
-  //         tx.pure.string(formData.slushwallet || ""),
-  //         tx.pure.string(formData.ava_blod_id),
-  //       ],
-  //       target: `${PACKAGE_ID}::profiles::verify_profile`
-  //     });
-  //     await signAndExecute(
-  //       {
-  //         transaction: tx,
-  //       },
-  //       {
-  //         onSuccess: () => {
-  //           console.log("Profile transaction successful, calling onSuccess");
-  //           success("Profile created successfully!");
-  //           onClose();
-  //           reset();
-  //           onSuccess?.();
-  //         },
-  //         onError: (transactionError: Error) => {
-  //           console.error("Transaction failed:", transactionError);
-  //           error("Transaction failed: " + transactionError.message);
-  //         }
-  //       }
-  //     );
-  //   } finally {
-  //     console.log("Profile form data: ", formData);
-  //     setIsSubmitting(false);
-  //   }
-  // };
-
   // ---------------With sponsor gas transaction---------
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -230,7 +179,6 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ initialData, onClose,
       });
       toast.success("Profile created successfully!");
       if (onClose) onClose();
-      if (onSuccess) onSuccess();
     } catch (err) {
       console.error("Transaction error:", err);
       const errorMessage = err instanceof Error ? err.message : "Transaction failed";
@@ -351,3 +299,53 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ initialData, onClose,
 };
 
 export default EditProfileForm;
+// ----------Excute transaction without sponsor gas--------
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   if (!currentAccount) {
+  //     error("Please connect your wallet first");
+  //     return;
+  //   }
+  //   if (!formData.ava_blod_id) {
+  //     error("Please upload an avatar first");
+  //     return;
+  //   }
+  //   setIsSubmitting(true);
+  //   try {
+  //     const tx = new Transaction();
+  //     tx.moveCall({
+  //       arguments: [
+  //         tx.object(DASHBOARD_ID),
+  //         tx.pure.string(formData.name || ""),
+  //         tx.pure.string(formData.username || ""),
+  //         tx.pure.string(formData.github || ""),
+  //         tx.pure.string(formData.linkedin || ""),
+  //         tx.pure.string(formData.bio || ""),
+  //         tx.pure.string(formData.slushwallet || ""),
+  //         tx.pure.string(formData.ava_blod_id),
+  //       ],
+  //       target: `${PACKAGE_ID}::profiles::verify_profile`
+  //     });
+  //     await signAndExecute(
+  //       {
+  //         transaction: tx,
+  //       },
+  //       {
+  //         onSuccess: () => {
+  //           console.log("Profile transaction successful, calling onSuccess");
+  //           success("Profile created successfully!");
+  //           onClose();
+  //           reset();
+  //           onSuccess?.();
+  //         },
+  //         onError: (transactionError: Error) => {
+  //           console.error("Transaction failed:", transactionError);
+  //           error("Transaction failed: " + transactionError.message);
+  //         }
+  //       }
+  //     );
+  //   } finally {
+  //     console.log("Profile form data: ", formData);
+  //     setIsSubmitting(false);
+  //   }
+  // };

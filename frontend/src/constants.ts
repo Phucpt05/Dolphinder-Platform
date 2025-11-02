@@ -1,5 +1,5 @@
-export const DASHBOARD_ID = "0x40f7194dd2b4f478079bade716910e5e5d8817208d11b0cc304e31555fe5e291";
-export const PACKAGE_ID = "0xfb8b8f7e81b7fcee23f418d459480fba936194dd44705a626ad1c47c7c617827";
+export const DASHBOARD_ID = "0x04e3a882c654958263f0dd45047200f4ee22c0c5286783b6591c1ab1d2aa0888";
+export const PACKAGE_ID = "0xb53e477569b548b01110002568a0fbaf97ebd434017fcbd422b6aa66b1a98bc6";
   
 const SUI_NETWORK = 'testnet'
 export const SUI_VIEW_TX_URL = `https://suiscan.xyz/${SUI_NETWORK}/tx`
