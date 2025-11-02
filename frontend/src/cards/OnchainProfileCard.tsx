@@ -1,4 +1,4 @@
-import { Github, Globe, Linkedin, Trash2 } from "lucide-react";
+import { Github, Globe, Linkedin, Trash2, Crown } from "lucide-react";
 import { useProfileQuery } from "../hooks/useProfileQuery";
 import { AGGREGATOR, DASHBOARD_ID, PACKAGE_ID } from "../constants";
 import { OnchainProfile } from "../hooks/useAllProfilesQuery";
@@ -80,6 +80,15 @@ const OnchainProfileCard: React.FC<OnchainProfileCardProps> = ({ profile, dashbo
       className="group block bg-white/10 backdrop-blur-md rounded-xl border border-white/20 p-6 hover:bg-white/10 hover:border-blue-400/50 transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-blue-500/30 cursor-pointer relative"
       onClick={() => handleDeveloperClick(profile.owner)}
     >
+      {/* Admin indicator - only visible to dashboard creator */}
+      {canRemove && (
+        <div className="absolute top-2 left-2 flex items-center space-x-1">
+          <div className="bg-yellow-500/80 text-white text-xs px-2 py-1 rounded-full flex items-center">
+            <Crown className="w-3 h-3" />
+          </div>
+        </div>
+      )}
+
       {/* Remove button - only visible to dashboard creator */}
       {canRemove && (
         <button
