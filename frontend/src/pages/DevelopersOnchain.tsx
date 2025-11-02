@@ -3,7 +3,7 @@ import { useAllProfilesQuery } from "../hooks/useAllProfilesQuery";
 import OnchainProfileCard from "../cards/OnchainProfileCard";
 
 const DevelopersOnchain: React.FC = () => {
-  const { profiles, isLoading, error } = useAllProfilesQuery();
+  const { profiles, isLoading, error, dashboardCreator } = useAllProfilesQuery();
 
   if (isLoading) {
     return (
@@ -40,7 +40,7 @@ const DevelopersOnchain: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {profiles.map((profile) => (
-              <OnchainProfileCard key={profile.id.id} profile={profile} />
+              <OnchainProfileCard key={profile.id.id} profile={profile} dashboardCreator={dashboardCreator} />
             ))}
           </div>
 

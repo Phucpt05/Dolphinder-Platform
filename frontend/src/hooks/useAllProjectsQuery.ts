@@ -14,8 +14,6 @@ export const useAllProjectsQuery = () => {
     return acc;
   }, []) || [];
 
-  console.log("All project IDs from profiles: ", allProjectIds);
-
   // Query projects using their IDs
   const { data: projectsData, isPending: isProjectsPending, error: projectsError, isSuccess } = useSuiClientQuery(
     "multiGetObjects", {
@@ -58,10 +56,7 @@ export const useAllProjectsQuery = () => {
     };
   }).filter((project): project is NonNullable<typeof project> => project !== null) || [];
 
-  // Sort projects by vote_count from highest to lowest
   const sortedProjects = [...projects].sort((a, b) => b.vote_count - a.vote_count);
-
-  console.log("Processed projects: ", sortedProjects);
 
   const refetch = () => {
     return queryClient.invalidateQueries();

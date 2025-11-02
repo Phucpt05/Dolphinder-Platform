@@ -21,8 +21,6 @@ export const useProfileQuery = (targetAddress: string) => {
     ? (dashboardData.data.content.fields as { verified_profiles: string[] }).verified_profiles
     : [];
 
-  console.log("profileIDs: ", profileIds);
-
   const { data: profilesData, isPending: isProfilesPending, error: profilesError } = useSuiClientQuery(
     "multiGetObjects", {
     ids: profileIds,

@@ -104,7 +104,7 @@ module dolphinder_profiles::profiles {
             list_certificates: vector::empty<ID>(),
         };
         vector::push_back(&mut dashboard.verified_profiles, profile.id.to_inner());        
-        transfer::public_transfer(profile, ctx.sender());
+        transfer::share_object(profile);
     }
 
 
@@ -183,6 +183,7 @@ module dolphinder_profiles::profiles {
         dashboard: &mut Dashboard,
         current_address: address,
         profile: Profile,
+        ctx: &mut TxContext
     ) {
         assert!(dashboard.creator == current_address, ENotPublisher);
         

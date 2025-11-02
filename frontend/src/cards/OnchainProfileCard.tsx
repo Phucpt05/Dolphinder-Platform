@@ -1,14 +1,22 @@
-import { Github, Globe, Linkedin } from "lucide-react";
+import { Github, Globe, Linkedin, Trash2 } from "lucide-react";
 import { useProfileQuery } from "../hooks/useProfileQuery";
-import { AGGREGATOR } from "../constants";
+import { AGGREGATOR, DASHBOARD_ID, PACKAGE_ID } from "../constants";
 import { OnchainProfile } from "../hooks/useAllProfilesQuery";
+import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
+import { Transaction } from "@mysten/sui/transactions";
+import { useState } from "react";
+import toast from "react-hot-toast";
 
 interface OnchainProfileCardProps {
   profile: OnchainProfile;
+  dashboardCreator: string;
 }
 
-const OnchainProfileCard: React.FC<OnchainProfileCardProps> = ({ profile }) => {
+const OnchainProfileCard: React.FC<OnchainProfileCardProps> = ({ profile, dashboardCreator }) => {
   const { profile: detailedProfile } = useProfileQuery(profile.owner);
+  const currentAccount = useCurrentAccount();
+  const { mutateAsync: signAndExecuteTransaction } = useSignAndExecuteTransaction();
+  const [isRemoving, setIsRemoving] = useState(false);
 
   const handleDeveloperClick = (owner: string) => {
     window.location.href = `/profile/${owner}`;
@@ -18,12 +26,72 @@ const OnchainProfileCard: React.FC<OnchainProfileCardProps> = ({ profile }) => {
     e.stopPropagation();
   };
 
+  const handleRemoveClick = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    if (!currentAccount) {
+      toast.error("Please connect your wallet first");
+      return;
+    }
+
+    setIsRemoving(true);
+    try {
+      const tx = new Transaction();
+      tx.moveCall({
+        arguments: [
+          tx.object(DASHBOARD_ID),
+          tx.pure.address(currentAccount.address),
+          tx.object(profile.id.id),
+        ],
+        target: `${PACKAGE_ID}::profiles::remove_profile`
+      });
+
+      await signAndExecuteTransaction(
+        {
+          transaction: tx,
+        },
+        {
+          onSuccess: () => {
+            toast.success("Profile removed successfully!");
+            // Refresh the page to show updated list
+            window.location.reload();
+          },
+          onError: (error) => {
+            console.error("Transaction failed:", error);
+            toast.error("Failed to remove profile: " + error.message);
+          }
+        }
+      );
+    } catch (err) {
+      console.error("Remove profile error:", err);
+      const errorMessage = err instanceof Error ? err.message : "Failed to remove profile";
+      toast.error(errorMessage);
+    } finally {
+      setIsRemoving(false);
+    }
+  };
+
+  // Check if current user is the dashboard creator
+  const canRemove = currentAccount?.address === dashboardCreator;
+
   return (
     <div
       key={profile.id.id}
-      className="group block bg-white/10 backdrop-blur-md rounded-xl border border-white/20 p-6 hover:bg-white/10 hover:border-blue-400/50 transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-blue-500/30 cursor-pointer"
+      className="group block bg-white/10 backdrop-blur-md rounded-xl border border-white/20 p-6 hover:bg-white/10 hover:border-blue-400/50 transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:shadow-blue-500/30 cursor-pointer relative"
       onClick={() => handleDeveloperClick(profile.owner)}
     >
+      {/* Remove button - only visible to dashboard creator */}
+      {canRemove && (
+        <button
+          onClick={handleRemoveClick}
+          disabled={isRemoving}
+          className="absolute top-2 right-2 p-2 bg-red-500/80 hover:bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          title="Remove Profile"
+        >
+          <Trash2 className="w-4 h-4" />
+        </button>
+      )}
+
       <div className="flex justify-center mb-4">
         <div className="relative">
           <img

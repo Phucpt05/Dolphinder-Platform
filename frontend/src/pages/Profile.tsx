@@ -200,7 +200,6 @@ const Profile = () => {
               onClose={() => setShowAddProjectForm(false)}
               profileId={profileId}
               onSuccess={() => {
-                console.log("AddProjectForm onSuccess called, refetching data");
                 refetchProfile();
                 refetchProjects();
               }}
@@ -214,7 +213,6 @@ const Profile = () => {
               onClose={() => setShowAddCertificateForm(false)}
               profileId={profileId}
               onSuccess={() => {
-                console.log("AddCertificateForm onSuccess called, refetching data");
                 refetchProfile();
                 refetchCertificates();
               }}

@@ -45,20 +45,16 @@ const CertificateUpload: React.FC<CertificateUploadProps> = ({ onUpload, current
           method: "PUT",
           body: file
         });
-        console.log("response: ", response);
         if (!response.ok) {
           const errorText = await response.text();
           throw new Error(`Failed to upload file: ${errorText}`);
         }
 
         const info: WalrusResponse = await response.json();
-        console.log("info response: ", info);
 
         // Set blob ID for display - correct path based on the response structure
         const blobIdValue = info.newlyCreated?.blobObject?.blobId || "";
         setBlobId(blobIdValue);
-
-        console.log("blobID: ", blobIdValue);
 
         onUpload({
           info,

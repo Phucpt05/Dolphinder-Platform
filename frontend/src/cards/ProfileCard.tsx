@@ -21,10 +21,6 @@ const ProfileCard: React.FC<ProfileCardProps> = ({ address, isOwner, onProfileId
   const [copied, setCopied] = useState(false);
   const { profile, isLoading, error, isProfileFound, refetch } = useProfileQuery(address);
   
-  
-  console.log("Profile data from blockchain:", profile);
-  
-  // Notify parent component when profile ID is available
   useEffect(() => {
     if (profile?.id?.id && onProfileIdChange) {
       onProfileIdChange(profile.id.id);

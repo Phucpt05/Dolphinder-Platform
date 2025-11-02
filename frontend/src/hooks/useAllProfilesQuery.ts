@@ -28,11 +28,13 @@ export const useAllProfilesQuery = () => {
   }
   );
 
-  const profileIds = dashboardData?.data?.content?.dataType === "moveObject"
-    ? (dashboardData.data.content.fields as { verified_profiles: string[] }).verified_profiles
-    : [];
+  const dashboardFields = dashboardData?.data?.content?.dataType === "moveObject"
+    ? dashboardData.data.content.fields as { verified_profiles: string[]; creator: string }
+    : { verified_profiles: [], creator: "" };
 
-  console.log("All profile IDs from onchain: ", profileIds);
+  const profileIds = dashboardFields.verified_profiles;
+  const dashboardCreator = dashboardFields.creator;
+
 
   const { data: profilesData, isPending: isProfilesPending, error: profilesError } = useSuiClientQuery(
     "multiGetObjects", {
@@ -55,12 +57,11 @@ export const useAllProfilesQuery = () => {
     return acc;
   }, []) || [];
 
-  console.log("Processed onchain profiles: ", profiles);
-
   return {
     profiles,
     isLoading: isDashboardPending || (profileIds.length > 0 && isProfilesPending),
     error: dashboardError || profilesError,
     profileIds,
+    dashboardCreator,
   };
 };
