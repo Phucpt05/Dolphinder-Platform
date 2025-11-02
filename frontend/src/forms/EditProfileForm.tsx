@@ -4,14 +4,106 @@ import { Button } from "../components/shared/Button";
 import AvatarUpload from "../components/upload-handle/AvatarUpload";
 import { ProfileData, WalrusResponse } from "../types";
 import { AGGREGATOR, DASHBOARD_ID, PACKAGE_ID } from "../constants";
-import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
+import { useCurrentAccount, useSignTransaction, useSuiClient } from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
 import { useToast } from "../components/providers/ToastProvider";
+import { toBase64 } from "@mysten/sui/utils";
+import toast from "react-hot-toast";
 
 interface EditProfileFormProps {
   initialData?: ProfileData;
   onClose: () => void;
   onSuccess?: () => void;
+}
+const BACKEND_URL = "http://localhost:3001";
+
+async function sponsorAndExecute({
+  tx,
+  suiClient,
+  signTransaction,
+  currentAccount,
+  allowedMoveCallTargets,
+  allowedAddresses,
+}: {
+  tx: Transaction;
+  suiClient: ReturnType<typeof useSuiClient>;
+  signTransaction: ReturnType<typeof useSignTransaction>["mutateAsync"];
+  currentAccount: ReturnType<typeof useCurrentAccount>;
+  allowedMoveCallTargets?: string[];
+  allowedAddresses: string[];
+}) {
+  // Check if currentAccount exists
+  if (!currentAccount) {
+    throw new Error("No account connected");
+  }
+
+  // 1. Build transaction bytes
+  const txBytes = await tx.build({
+    client: suiClient,
+    onlyTransactionKind: true,
+  });
+
+  // 2. Request sponsorship from backend
+  const sponsorResponse = await fetch(
+    `${BACKEND_URL}/api/sponsor-transaction`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        transactionKindBytes: toBase64(txBytes),
+        sender: currentAccount.address,
+        network: "testnet",
+        ...(allowedMoveCallTargets && { allowedMoveCallTargets }),
+        allowedAddresses,
+      }),
+    }
+  );
+
+  if (!sponsorResponse.ok) {
+    const errorText = await sponsorResponse.text();
+    let errorMessage = `Sponsorship failed: ${sponsorResponse.status}`;
+    try {
+      const error = JSON.parse(errorText);
+      errorMessage = `Sponsorship failed: ${error.error || error.message || errorText}`;
+    } catch {
+      errorMessage = `Sponsorship failed: ${errorText}`;
+    }
+    throw new Error(errorMessage);
+  }
+
+  const sponsorData = await sponsorResponse.json();
+  const { bytes, digest } = sponsorData;
+
+  // 3. Sign with user's zkLogin key
+  const { signature } = await signTransaction({ transaction: bytes });
+  if (!signature) {
+    throw new Error("Error signing transaction");
+  }
+
+  // 4. Execute the transaction via backend
+  const executeResponse = await fetch(
+    `${BACKEND_URL}/api/execute-transaction`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ digest, signature }),
+    }
+  );
+
+  if (!executeResponse.ok) {
+    const errorText = await executeResponse.text();
+    let errorMessage = `Execution failed: ${executeResponse.status}`;
+    try {
+      const error = JSON.parse(errorText);
+      errorMessage = `Execution failed: ${error.error || error.message || errorText}`;
+    } catch {
+      errorMessage = `Execution failed: ${errorText}`;
+    }
+    throw new Error(errorMessage);
+  }
+
+  await executeResponse.json();
+  return true;
 }
 
 const EditProfileForm: React.FC<EditProfileFormProps> = ({ initialData, onClose, onSuccess }) => {
@@ -28,9 +120,10 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ initialData, onClose,
   );
   
   const currentAccount = useCurrentAccount();
-  const { mutateAsync: signAndExecute, reset } = useSignAndExecuteTransaction();
+  const suiClient = useSuiClient();
+  const { mutateAsync: signTransaction } = useSignTransaction();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { success, error } = useToast();
+  const { error } = useToast();
 
   const handleAvatarUpload = (data: { info: WalrusResponse; mediaType: string }) => {
     // Get blob ID from the correct path in the response
@@ -47,25 +140,71 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ initialData, onClose,
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
+// ----------Excute transaction without sponsor gas--------
+  // const handleSubmit = async (e: React.FormEvent) => {
+  //   e.preventDefault();
+  //   if (!currentAccount) {
+  //     error("Please connect your wallet first");
+  //     return;
+  //   }
+  //   if (!formData.ava_blod_id) {
+  //     error("Please upload an avatar first");
+  //     return;
+  //   }
+  //   setIsSubmitting(true);
+  //   try {
+  //     const tx = new Transaction();
+  //     tx.moveCall({
+  //       arguments: [
+  //         tx.object(DASHBOARD_ID),
+  //         tx.pure.string(formData.name || ""),
+  //         tx.pure.string(formData.username || ""),
+  //         tx.pure.string(formData.github || ""),
+  //         tx.pure.string(formData.linkedin || ""),
+  //         tx.pure.string(formData.bio || ""),
+  //         tx.pure.string(formData.slushwallet || ""),
+  //         tx.pure.string(formData.ava_blod_id),
+  //       ],
+  //       target: `${PACKAGE_ID}::profiles::verify_profile`
+  //     });
+  //     await signAndExecute(
+  //       {
+  //         transaction: tx,
+  //       },
+  //       {
+  //         onSuccess: () => {
+  //           console.log("Profile transaction successful, calling onSuccess");
+  //           success("Profile created successfully!");
+  //           onClose();
+  //           reset();
+  //           onSuccess?.();
+  //         },
+  //         onError: (transactionError: Error) => {
+  //           console.error("Transaction failed:", transactionError);
+  //           error("Transaction failed: " + transactionError.message);
+  //         }
+  //       }
+  //     );
+  //   } finally {
+  //     console.log("Profile form data: ", formData);
+  //     setIsSubmitting(false);
+  //   }
+  // };
 
+  // ---------------With sponsor gas transaction---------
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!currentAccount) {
       error("Please connect your wallet first");
       return;
     }
-
     if (!formData.ava_blod_id) {
       error("Please upload an avatar first");
       return;
     }
-
     setIsSubmitting(true);
-    
     try {
       const tx = new Transaction();
-      
       tx.moveCall({
         arguments: [
           tx.object(DASHBOARD_ID),
@@ -79,31 +218,29 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ initialData, onClose,
         ],
         target: `${PACKAGE_ID}::profiles::verify_profile`
       });
-
-      await signAndExecute(
-        {
-          transaction: tx,
-        },
-        {
-          onSuccess: () => {
-            console.log("Profile transaction successful, calling onSuccess");
-            success("Profile created successfully!");
-            onClose();
-            reset();
-            onSuccess?.();
-          },
-          onError: (transactionError: Error) => {
-            console.error("Transaction failed:", transactionError);
-            error("Transaction failed: " + transactionError.message);
-          }
-        }
-      );
+      await sponsorAndExecute({
+        tx,
+        suiClient,
+        signTransaction,
+        currentAccount,
+        allowedMoveCallTargets: [
+          `${PACKAGE_ID}::profiles::verify_profile`,
+        ],
+        allowedAddresses: [currentAccount.address],
+      });
+      toast.success("Profile created successfully!");
+      if (onClose) onClose();
+      if (onSuccess) onSuccess();
+    } catch (err) {
+      console.error("Transaction error:", err);
+      const errorMessage = err instanceof Error ? err.message : "Transaction failed";
+      toast.error(errorMessage);
     } finally {
       console.log("Profile form data: ", formData);
       setIsSubmitting(false);
     }
   };
-
+  // ----------------------------------------------------
   return (
     <motion.div
       initial={{ opacity: 0 }}
