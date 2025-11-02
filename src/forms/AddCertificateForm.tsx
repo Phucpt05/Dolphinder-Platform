@@ -1,48 +1,46 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { Button } from "./shared/Button";
-import { ProjectFormData, WalrusResponse } from "../types";
+import { CertificateFormData, WalrusResponse } from "../types";
+import { PACKAGE_ID } from "../constants";
 import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
-import { PACKAGE_ID, AGGREGATOR } from "../constants";
-import AvatarUpload from "./upload-handle/AvatarUpload";
-import { useToast } from "./providers/ToastProvider";
+import CertificateUpload from "../components/upload-handle/CertificateUpload";
+import { Button } from "../components/shared/Button";
+import { useToast } from "../components/providers/ToastProvider";
 
-interface AddProjectFormProps {
+interface AddCertificateFormProps {
   onClose: () => void;
   profileId: string;
   onSuccess?: () => void;
 }
 
-const AddProjectForm: React.FC<AddProjectFormProps> = ({ onClose, profileId, onSuccess }) => {
-  const [formData, setFormData] = useState<ProjectFormData>({
+const AddCertificateForm: React.FC<AddCertificateFormProps> = ({ onClose, profileId, onSuccess }) => {
+  const [formData, setFormData] = useState<CertificateFormData>({
     title: "",
-    description: "",
-    technologies: "",
-    githubLink: "",
-    youtubeLink: "",
-    img_prj_blods_id: "",
+    organization: "",
+    issueDate: "",
+    expiryDate: "",
+    verifyLink: "",
+    img_cer_blods_id: "",
   });
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
 
   const currentAccount = useCurrentAccount();
   const { mutateAsync: signAndExecute, reset } = useSignAndExecuteTransaction();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { success, error } = useToast();
 
-  const handleProjectImageUpload = (data: { info: WalrusResponse; mediaType: string }) => {
+  const handleCertificateUpload = (data: { info: WalrusResponse; mediaType: string }) => {
     // Get blob ID from the correct path in the response
     const blobId = data.info.newlyCreated?.blobObject?.blobId || "";
-    const imageUrl = `${AGGREGATOR}/v1/${blobId}`;
     setFormData(prev => ({
       ...prev,
-      img_prj_blods_id: blobId,
-      imageUrl: imageUrl
+      img_cer_blods_id: blobId
     }));
+  };
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,25 +51,27 @@ const AddProjectForm: React.FC<AddProjectFormProps> = ({ onClose, profileId, onS
       return;
     }
 
+    if (!formData.img_cer_blods_id) {
+      error("Please upload a certificate image first");
+      return;
+    }
+
     setIsSubmitting(true);
     
     try {
       const tx = new Transaction();
       
-      // Convert technologies string to array of strings for the Move function
-      const technologiesArray = formData.technologies.split(',').map(tech => tech.trim()).filter(tech => tech);
-      
       tx.moveCall({
         arguments: [
           tx.object(profileId),
+          tx.pure.string(formData.organization),
           tx.pure.string(formData.title),
-          tx.pure.vector("string", technologiesArray),
-          tx.pure.string(formData.description),
-          tx.pure.string(formData.githubLink),
-          tx.pure.string(formData.youtubeLink),
-          tx.pure.string(formData.img_prj_blods_id),
+          tx.pure.string(formData.issueDate),
+          tx.pure.string(formData.expiryDate),
+          tx.pure.string(formData.verifyLink),
+          tx.pure.string(formData.img_cer_blods_id),
         ],
-        target: `${PACKAGE_ID}::profiles::create_project_showcase`
+        target: `${PACKAGE_ID}::profiles::create_certificate`
       });
 
       await signAndExecute(
@@ -80,8 +80,8 @@ const AddProjectForm: React.FC<AddProjectFormProps> = ({ onClose, profileId, onS
         },
         {
           onSuccess: () => {
-            console.log("Project transaction successful, calling onSuccess");
-            success("Project created successfully!");
+            console.log("Certificate transaction successful, calling onSuccess");
+            success("Certificate created successfully!");
             onClose();
             reset();
             onSuccess?.();
@@ -113,11 +113,11 @@ const AddProjectForm: React.FC<AddProjectFormProps> = ({ onClose, profileId, onS
         className="bg-gray-800 rounded-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-2xl font-bold text-white mt-0">Add New Project</h2>
+        <h2 className="text-2xl font-bold text-white mb-6">Add New Certificate</h2>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Project Title</label>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Certificate Title</label>
             <input
               type="text"
               name="title"
@@ -129,69 +129,68 @@ const AddProjectForm: React.FC<AddProjectFormProps> = ({ onClose, profileId, onS
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Description</label>
-            <textarea
-              name="description"
-              value={formData.description}
+            <label className="block text-sm font-medium text-gray-300 mb-1">Issuing Organization</label>
+            <input
+              type="text"
+              name="organization"
+              value={formData.organization}
               onChange={handleInputChange}
               required
-              rows={3}
               className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Technologies (comma-separated)</label>
-            <input
-              type="text"
-              name="technologies"
-              value={formData.technologies}
-              onChange={handleInputChange}
-              placeholder="React, TypeScript, Tailwind CSS"
-              required
-              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            />
-          </div>
-          <div className="flex justify-between gap-5">
-            <div className="w-full">
-              <label className="block text-sm font-medium text-gray-300 mb-1">GitHub Link</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Issue Date</label>
               <input
-                type="url"
-                name="githubLink"
-                value={formData.githubLink}
+                type="date"
+                name="issueDate"
+                value={formData.issueDate}
                 onChange={handleInputChange}
-                placeholder="https://github.com/username/repo"
+                required
                 className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
             
-            <div className="w-full">
-              <label className="block text-sm font-medium text-gray-300 mb-1">YouTube Link</label>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">Expiry Date </label>
               <input
-                type="url"
-                name="youtubeLink"
-                value={formData.youtubeLink}
+                type="date"
+                name="expiryDate"
+                value={formData.expiryDate}
                 onChange={handleInputChange}
-                placeholder="https://youtube.com/watch?v=..."
                 className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-3">Project Image</label>
-            <AvatarUpload
-              onUpload={handleProjectImageUpload}
-              currentAvatar={formData.img_prj_blods_id}
+            <label className="block text-sm font-medium text-gray-300 mb-1">Verification Link</label>
+            <input
+              type="url"
+              name="verifyLink"
+              value={formData.verifyLink}
+              onChange={handleInputChange}
+              placeholder="https://credential-verification.com/verify"
+              className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-3">Certificate Image</label>
+            <CertificateUpload
+              onUpload={handleCertificateUpload}
+              currentImage={formData.img_cer_blods_id}
             />
           </div>
           
           <div className="flex gap-3 pt-4">
             <Button
               type="submit"
-              disabled={isSubmitting || !currentAccount || !formData.img_prj_blods_id}
+              disabled={isSubmitting || !currentAccount || !formData.img_cer_blods_id}
             >
-              {isSubmitting ? "Creating Project..." : "Add Project"}
+              {isSubmitting ? "Creating Certificate..." : "Add Certificate"}
             </Button>
             <Button
               type="button"
@@ -208,4 +207,4 @@ const AddProjectForm: React.FC<AddProjectFormProps> = ({ onClose, profileId, onS
   );
 };
 
-export default AddProjectForm;
+export default AddCertificateForm;

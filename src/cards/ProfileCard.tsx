@@ -1,13 +1,13 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import { Button } from "./shared/Button";
-import EditProfileForm from "./EditProfileForm";
+import EditProfileForm from "../forms/EditProfileForm";
 import { AnimatePresence } from "framer-motion";
 import { ProfileData } from "../types";
 import { useProfileQuery } from "../hooks/useProfileQuery";
-import LoadingSpinner from "./shared/LoadingSpinner";
 import { AGGREGATOR } from "../constants";
 import { Copy } from "lucide-react";
+import { Button } from "../components/shared/Button";
+import LoadingSpinner from "../components/shared/LoadingSpinner";
 
 interface ProfileCardProps {
   address: string;

@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
 import { PACKAGE_ID } from "../constants";
-import { useToast } from "./providers/ToastProvider";
+import { useToast } from "../components/providers/ToastProvider";
 
 interface ProjectCardProps {
   project: {
@@ -25,8 +25,6 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
   const { success, error } = useToast();
   const [isVoting, setIsVoting] = useState(false);
   
-  console.log("Project: ", project);
-
   const handleVote = async () => {
     if (!currentAccount) {
       error("Please connect your wallet first");

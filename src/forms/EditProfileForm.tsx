@@ -1,12 +1,12 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { Button } from "./shared/Button";
-import AvatarUpload from "./upload-handle/AvatarUpload";
+import { Button } from "../components/shared/Button";
+import AvatarUpload from "../components/upload-handle/AvatarUpload";
 import { ProfileData, WalrusResponse } from "../types";
 import { AGGREGATOR, DASHBOARD_ID, PACKAGE_ID } from "../constants";
 import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
-import { useToast } from "./providers/ToastProvider";
+import { useToast } from "../components/providers/ToastProvider";
 
 interface EditProfileFormProps {
   initialData?: ProfileData;

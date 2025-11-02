@@ -1,6 +1,6 @@
 import SimpleSilk from "../components/react-bits/SimpleSilk";
 import { useAllProfilesQuery } from "../hooks/useAllProfilesQuery";
-import OnchainProfileCard from "../components/OnchainProfileCard";
+import OnchainProfileCard from "../cards/OnchainProfileCard";
 
 const DevelopersOnchain: React.FC = () => {
   const { profiles, isLoading, error } = useAllProfilesQuery();

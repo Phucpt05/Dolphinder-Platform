@@ -2,16 +2,16 @@ import { useCurrentAccount } from "@mysten/dapp-kit";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import ProfileCard from "../components/ProfileCard";
-import ProjectCard from "../components/ProjectCard";
-import CertificateCard from "../components/CertificateCard";
-import AddProjectForm from "../components/AddProjectForm";
-import AddCertificateForm from "../components/AddCertificateForm";
+import CertificateCard from "../cards/CertificateCard";
 import { Button } from "../components/shared/Button";
 import { useProfileQuery } from "../hooks/useProfileQuery";
 import { useProjectQuery } from "../hooks/useProjectQuery";
 import { useCertificateQuery } from "../hooks/useCertificateQuery";
 import SimpleSilk from "../components/react-bits/SimpleSilk";
+import AddCertificateForm from "../forms/AddCertificateForm";
+import AddProjectForm from "../forms/AddProjectForm";
+import ProjectCard from "../cards/ProjectCard";
+import ProfileCard from "../cards/ProfileCard";
 
 const Profile = () => {
   const currentAccount = useCurrentAccount();
