@@ -35,7 +35,8 @@ It allows every builder to prove their skills, display their projects, and earn 
 
 ## ⚙️ Tech Stack
 
-* **Frontend:** Astro + React + Tailwind
+* **FE:** Ts + React + Tailwind + shadcn/ui + React-Bit
+* **BE:** Ts + expressjs
 * **Smart Contract:** Move (Sui Testnet)
 * **Storage:** Walrus (permanent storage)
 * **Auth / Wallet:** Sui Wallet, zkLogin (Google)
