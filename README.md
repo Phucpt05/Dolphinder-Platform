@@ -42,12 +42,3 @@ It allows every builder to prove their skills, display their projects, and earn 
 * **Auth / Wallet:** Sui Wallet, zkLogin (Google)
 * **Sponsored Gas:** MystenLabs Enoki / Sponsored API
 
----
-
-## 💡 Summary
-
-Dolphinder empowers developers to **build, verify, and showcase** their on-chain identity — all without worrying about gas fees.
-It bridges the Web2 experience (Google login) with Web3 ownership, making on-chain profiles accessible to everyone.
-
-> **Build. Prove. Verify. On Sui.**
-
