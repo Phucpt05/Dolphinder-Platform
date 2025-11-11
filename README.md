@@ -2,8 +2,6 @@
 ### 🧠 Build your on-chain developer profile, showcase your projects, and prove your skills on Sui.
 
 > Powered by **Sui** 🪙 + **Walrus** 🧊 + **Enoki** ⛽
-> Hosted by **SuiHub APAC**
-
 ---
 
 ## 🚀 Project Overview
