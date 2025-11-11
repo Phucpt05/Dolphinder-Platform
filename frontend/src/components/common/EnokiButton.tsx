@@ -26,8 +26,7 @@ export function EnokiButton() {
 			{ wallet: googleWallet },
 			{
 				onSuccess: () => {
-					// Redirect to profile page after successful login
-					navigate('/profile');
+					navigate('/');
 				},
 				onError: (err) => {
 					setError('Failed to connect with Google. Please try again.');
