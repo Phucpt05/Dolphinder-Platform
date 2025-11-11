@@ -41,4 +41,28 @@ It allows every builder to prove their skills, display their projects, and earn 
 * **Storage:** Walrus (permanent storage)
 * **Auth / Wallet:** Sui Wallet, zkLogin (Google)
 * **Sponsored Gas:** MystenLabs Enoki / Sponsored API
+---
+## 🧭 How to use
 
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Phucpt05/Dolphinder-Platform.git
+   ```
+2. **Run the Enoki Sponsor Backend**
+   ```bash
+    cd .\enoki-sponsor-BE\
+    npm install
+    npm run dev
+   ```
+3. **Run the Frontend**
+   ```bash
+    cd ..\frontend\
+    pnpm install
+    pnpm run dev
+   ```
+4. **Smart contract**
+   ```bash
+   cd ..\.\smart-contract\move\dolphinder_profiles\
+   sui client publish
+   ```
+   -> Update DASHBOARD_ID, PACKAGE_ID; add env 
