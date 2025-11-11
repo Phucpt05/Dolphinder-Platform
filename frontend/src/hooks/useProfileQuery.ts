@@ -33,7 +33,6 @@ export const useProfileQuery = (targetAddress: string) => {
     }
   );
 
-  // Find the profile that matches the target address (searching from end to get most recent)
   const profileData = profilesData?.reduceRight<SuiObjectResponse | undefined>((found, profile) => {
     if (found) return found; // Already found a match
     if (profile.data?.content?.dataType !== "moveObject") return undefined;
@@ -41,7 +40,6 @@ export const useProfileQuery = (targetAddress: string) => {
     return fields.owner === targetAddress ? profile : undefined;
   }, undefined);
 
-  // Extract profile fields if found
   const profile = profileData?.data?.content?.dataType === "moveObject"
     ? profileData.data.content.fields as {
       id: { id: string };

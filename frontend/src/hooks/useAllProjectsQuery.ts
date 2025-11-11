@@ -6,7 +6,6 @@ export const useAllProjectsQuery = () => {
   const queryClient = useQueryClient();
   const { profiles, isLoading: isProfilesLoading, error: profilesError } = useAllProfilesQuery();
 
-  // Extract all project IDs from all profiles
   const allProjectIds = profiles?.reduce<string[]>((acc, profile) => {
     if (profile.list_projects && profile.list_projects.length > 0) {
       acc.push(...profile.list_projects);
@@ -14,7 +13,6 @@ export const useAllProjectsQuery = () => {
     return acc;
   }, []) || [];
 
-  // Query projects using their IDs
   const { data: projectsData, isPending: isProjectsPending, error: projectsError, isSuccess } = useSuiClientQuery(
     "multiGetObjects", {
     ids: allProjectIds,

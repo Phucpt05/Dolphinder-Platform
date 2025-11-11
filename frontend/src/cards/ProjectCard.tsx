@@ -1,10 +1,11 @@
-import { motion } from "framer-motion";
 import { useState } from "react";
+import { motion } from "framer-motion";
 import { useCurrentAccount, useSignTransaction, useSuiClient } from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
 import { PACKAGE_ID } from "../constants";
 import { useToast } from "../components/providers/ToastProvider";
 import { sponsorAndExecute } from "../lib/utils";
+import { useHasVoted } from "../hooks/useHasVoted";
 
 interface ProjectCardProps {
   project: {
@@ -15,9 +16,9 @@ interface ProjectCardProps {
     githubLink?: string;
     youtubeLink?: string;
     imageUrl?: string;
-    owner?: string; 
-    vote_count?: number; 
-  };
+    owner?: string;
+    vote_count?: number;
+  }
 }
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
@@ -26,15 +27,14 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
   const suiClient = useSuiClient();
   const { success, error } = useToast();
   const [isVoting, setIsVoting] = useState(false);
-  
+  const {hasVoted, refetch: refetchVoteStatus} = useHasVoted(project.id, currentAccount?.address);
+
   const handleVote = async () => {
     if (!currentAccount) {
       error("Please connect your wallet first");
       return;
     }
-
     setIsVoting(true);
-
     try {
       const tx = new Transaction();
       tx.moveCall({
@@ -55,6 +55,8 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
       });
 
       success("Vote submitted successfully!");
+      // Refetch vote status to update the UI
+      refetchVoteStatus();
     } catch (transactionError: unknown) {
       console.error("Vote transaction failed:", transactionError);
       const errorMessage = transactionError instanceof Error ? transactionError.message : "Unknown error occurred";
@@ -133,11 +135,23 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
           
           <button
             onClick={handleVote}
-            disabled={isVoting || !currentAccount}
-            className="flex items-center gap-1 px-2 py-1 rounded hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            title={currentAccount ? "Vote for this project" : "Connect wallet to vote"}
+            disabled={isVoting || !currentAccount || hasVoted}
+            className={`flex items-center gap-1 px-2 py-1 rounded transition-colors ${
+              hasVoted
+                ? 'bg-pink-900/30 cursor-not-allowed'
+                : 'hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed'
+            }`}
+            title={
+              !currentAccount
+                ? "Connect wallet to vote"
+                : hasVoted
+                  ? "You have already voted for this project"
+                  : "Vote for this project"
+            }
           >
-            <span className="text-red-400">❤️</span>
+            <span className={hasVoted ? "text-pink-400" : "text-red-400"}>
+              {hasVoted ? "❤️" : "🤍"}
+            </span>
             <span className="text-white text-sm">
               {project.vote_count || 10}
             </span>
@@ -148,4 +162,4 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
   );
 };
 
-export default ProjectCard;
+export default ProjectCard

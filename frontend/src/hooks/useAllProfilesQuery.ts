@@ -18,7 +18,6 @@ export interface OnchainProfile {
 export const useAllProfilesQuery = () => {
   const dashboardID = useNetworkVariable("dashboardID");
 
-  // Query dashboard to get list of verified profiles
   const { data: dashboardData, isPending: isDashboardPending, error: dashboardError } = useSuiClientQuery(
     "getObject", {
     id: dashboardID,
@@ -48,7 +47,6 @@ export const useAllProfilesQuery = () => {
     }
   );
 
-  // Extract and filter valid profiles
   const profiles = profilesData?.reduce<OnchainProfile[]>((acc, profile) => {
     if (profile.data?.content?.dataType === "moveObject") {
       const fields = profile.data.content.fields as unknown as OnchainProfile;

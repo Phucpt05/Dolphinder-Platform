@@ -3,7 +3,6 @@ import { useQueryClient } from "@tanstack/react-query";
 
 export const useProjectQuery = (projectIds: string[]) => {
   const queryClient = useQueryClient();
-  // Query projects using their IDs
   const { data: projectsData, isPending, error, isSuccess } = useSuiClientQuery(
     "multiGetObjects", {
     ids: projectIds,
@@ -16,7 +15,6 @@ export const useProjectQuery = (projectIds: string[]) => {
     }
   );
 
-  // Transform the blockchain data to match our UI format
   const projects = projectsData?.map((project) => {
     if (project.data?.content?.dataType !== "moveObject") return null;
     

@@ -1,12 +1,3 @@
-/*
-/// Module: dolphinder_profiles
-module dolphinder_profiles::dolphinder_profiles;
-*/
-
-// For Move coding conventions, see
-// https://docs.sui.io/concepts/sui-move-concepts/conventions
-
-
 module dolphinder_profiles::profiles {
     use std::string::{String};
     use sui::table::{Self, Table};
