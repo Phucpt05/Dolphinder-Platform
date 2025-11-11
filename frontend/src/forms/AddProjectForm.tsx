@@ -1,12 +1,13 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { ProjectFormData, WalrusResponse } from "../types";
-import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
+import { useCurrentAccount, useSignTransaction, useSuiClient } from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
 import { PACKAGE_ID, AGGREGATOR } from "../constants";
 import { useToast } from "../components/providers/ToastProvider";
 import AvatarUpload from "../components/upload-handle/AvatarUpload";
 import { Button } from "../components/shared/Button";
+import { sponsorAndExecute } from "../lib/utils";
 
 interface AddProjectFormProps {
   onClose: () => void;
@@ -30,7 +31,8 @@ const AddProjectForm: React.FC<AddProjectFormProps> = ({ onClose, profileId, onS
   };
 
   const currentAccount = useCurrentAccount();
-  const { mutateAsync: signAndExecute, reset } = useSignAndExecuteTransaction();
+  const { mutateAsync: signTransaction } = useSignTransaction();
+  const suiClient = useSuiClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { success, error } = useToast();
 
@@ -74,24 +76,23 @@ const AddProjectForm: React.FC<AddProjectFormProps> = ({ onClose, profileId, onS
         target: `${PACKAGE_ID}::profiles::create_project_showcase`
       });
 
-      await signAndExecute(
-        {
-          transaction: tx,
-        },
-        {
-          onSuccess: () => {
-            console.log("Project transaction successful, calling onSuccess");
-            success("Project created successfully!");
-            onClose();
-            reset();
-            onSuccess?.();
-          },
-          onError: (transactionError: Error) => {
-            console.error("Transaction failed:", transactionError);
-            error("Transaction failed: " + transactionError.message);
-          }
-        }
-      );
+      await sponsorAndExecute({
+        tx,
+        suiClient,
+        signTransaction,
+        currentAccount,
+        allowedMoveCallTargets: [`${PACKAGE_ID}::profiles::create_project_showcase`],
+        allowedAddresses: [currentAccount.address],
+      });
+
+      console.log("Project transaction successful, calling onSuccess");
+      success("Project created successfully!");
+      onClose();
+      onSuccess?.();
+    } catch (transactionError: unknown) {
+      console.error("Transaction failed:", transactionError);
+      const errorMessage = transactionError instanceof Error ? transactionError.message : "Unknown error occurred";
+      error("Transaction failed: " + errorMessage);
     } finally {
       setIsSubmitting(false);
     }

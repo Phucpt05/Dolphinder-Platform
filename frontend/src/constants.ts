@@ -7,3 +7,4 @@ export const SUI_VIEW_OBJECT_URL = `https://suiscan.xyz/${SUI_NETWORK}/object`
 
 export const AGGREGATOR=`https://aggregator.walrus-testnet.walrus.space`
 export const PUBLISHER=`https://publisher.walrus-testnet.walrus.space`
+export const BACKEND_URL=`http://localhost:3001`

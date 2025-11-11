@@ -7,105 +7,14 @@ import { AGGREGATOR, DASHBOARD_ID, PACKAGE_ID } from "../constants";
 import { useCurrentAccount, useSignTransaction, useSuiClient } from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
 import { useToast } from "../components/providers/ToastProvider";
-import { toBase64 } from "@mysten/sui/utils";
 import toast from "react-hot-toast";
+import { sponsorAndExecute } from "../lib/utils";
 
 interface EditProfileFormProps {
   initialData?: ProfileData;
   onClose: () => void;
   onSuccess?: () => void;
 }
-const BACKEND_URL = "http://localhost:3001";
-// ultil for sponsor transaction send request to BE
-async function sponsorAndExecute({
-  tx,
-  suiClient,
-  signTransaction,
-  currentAccount,
-  allowedMoveCallTargets,
-  allowedAddresses,
-}: {
-  tx: Transaction;
-  suiClient: ReturnType<typeof useSuiClient>;
-  signTransaction: ReturnType<typeof useSignTransaction>["mutateAsync"];
-  currentAccount: ReturnType<typeof useCurrentAccount>;
-  allowedMoveCallTargets?: string[];
-  allowedAddresses: string[];
-}) {
-
-  if (!currentAccount) {
-    throw new Error("No account connected");
-  }
-
-  // 1. Build transaction bytes
-  const txBytes = await tx.build({
-    client: suiClient,
-    onlyTransactionKind: true,
-  });
-
-  // 2. Request sponsorship from backend
-  const sponsorResponse = await fetch(
-    `${BACKEND_URL}/api/sponsor-transaction`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        transactionKindBytes: toBase64(txBytes),
-        sender: currentAccount.address,
-        network: "testnet",
-        ...(allowedMoveCallTargets && { allowedMoveCallTargets }),
-        allowedAddresses,
-      }),
-    }
-  );
-
-  if (!sponsorResponse.ok) {
-    const errorText = await sponsorResponse.text();
-    let errorMessage = `Sponsorship failed: ${sponsorResponse.status}`;
-    try {
-      const error = JSON.parse(errorText);
-      errorMessage = `Sponsorship failed: ${error.error || error.message || errorText}`;
-    } catch {
-      errorMessage = `Sponsorship failed: ${errorText}`;
-    }
-    throw new Error(errorMessage);
-  }
-
-  const sponsorData = await sponsorResponse.json();
-  const { bytes, digest } = sponsorData;
-
-  // 3. Sign with user's zkLogin key
-  const { signature } = await signTransaction({ transaction: bytes });
-  if (!signature) {
-    throw new Error("Error signing transaction");
-  }
-
-  // 4. Execute the transaction via backend
-  const executeResponse = await fetch(
-    `${BACKEND_URL}/api/execute-transaction`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ digest, signature }),
-    }
-  );
-
-  if (!executeResponse.ok) {
-    const errorText = await executeResponse.text();
-    let errorMessage = `Execution failed: ${executeResponse.status}`;
-    try {
-      const error = JSON.parse(errorText);
-      errorMessage = `Execution failed: ${error.error || error.message || errorText}`;
-    } catch {
-      errorMessage = `Execution failed: ${errorText}`;
-    }
-    throw new Error(errorMessage);
-  }
-
-  await executeResponse.json();
-  return true;
-}
-
 const EditProfileForm: React.FC<EditProfileFormProps> = ({ initialData, onClose }) => {
   const [formData, setFormData] = useState<ProfileData>(
     initialData || {
@@ -140,7 +49,7 @@ const EditProfileForm: React.FC<EditProfileFormProps> = ({ initialData, onClose 
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
-  // ---------------With sponsor gas transaction---------
+  // ------------------------
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!currentAccount) {

@@ -1,9 +1,10 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
+import { useCurrentAccount, useSignTransaction, useSuiClient } from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
 import { PACKAGE_ID } from "../constants";
 import { useToast } from "../components/providers/ToastProvider";
+import { sponsorAndExecute } from "../lib/utils";
 
 interface ProjectCardProps {
   project: {
@@ -21,7 +22,8 @@ interface ProjectCardProps {
 
 const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
   const currentAccount = useCurrentAccount();
-  const { mutate: signAndExecute, reset } = useSignAndExecuteTransaction();
+  const { mutateAsync: signTransaction } = useSignTransaction();
+  const suiClient = useSuiClient();
   const { success, error } = useToast();
   const [isVoting, setIsVoting] = useState(false);
   
@@ -43,21 +45,20 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project }) => {
         target: `${PACKAGE_ID}::profiles::vote`
       });
 
-      await signAndExecute(
-        {
-          transaction: tx,
-        },
-        {
-          onSuccess: () => {
-            success("Vote submitted successfully!");
-            reset();
-          },
-          onError: (transactionError: Error) => {
-            console.error("Vote transaction failed:", transactionError);
-            error("Vote failed: " + transactionError.message);
-          }
-        }
-      );
+      await sponsorAndExecute({
+        tx,
+        suiClient,
+        signTransaction,
+        currentAccount,
+        allowedMoveCallTargets: [`${PACKAGE_ID}::profiles::vote`],
+        allowedAddresses: [currentAccount.address],
+      });
+
+      success("Vote submitted successfully!");
+    } catch (transactionError: unknown) {
+      console.error("Vote transaction failed:", transactionError);
+      const errorMessage = transactionError instanceof Error ? transactionError.message : "Unknown error occurred";
+      error("Vote failed: " + errorMessage);
     } finally {
       setIsVoting(false);
     }

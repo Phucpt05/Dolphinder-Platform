@@ -2,11 +2,12 @@ import { motion } from "framer-motion";
 import { useState } from "react";
 import { CertificateFormData, WalrusResponse } from "../types";
 import { PACKAGE_ID } from "../constants";
-import { useCurrentAccount, useSignAndExecuteTransaction } from "@mysten/dapp-kit";
+import { useCurrentAccount, useSignTransaction, useSuiClient } from "@mysten/dapp-kit";
 import { Transaction } from "@mysten/sui/transactions";
 import CertificateUpload from "../components/upload-handle/CertificateUpload";
 import { Button } from "../components/shared/Button";
 import { useToast } from "../components/providers/ToastProvider";
+import { sponsorAndExecute } from "../lib/utils";
 
 interface AddCertificateFormProps {
   onClose: () => void;
@@ -25,7 +26,8 @@ const AddCertificateForm: React.FC<AddCertificateFormProps> = ({ onClose, profil
   });
 
   const currentAccount = useCurrentAccount();
-  const { mutateAsync: signAndExecute, reset } = useSignAndExecuteTransaction();
+  const { mutateAsync: signTransaction } = useSignTransaction();
+  const suiClient = useSuiClient();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { success, error } = useToast();
 
@@ -74,24 +76,22 @@ const AddCertificateForm: React.FC<AddCertificateFormProps> = ({ onClose, profil
         target: `${PACKAGE_ID}::profiles::create_certificate`
       });
 
-      await signAndExecute(
-        {
-          transaction: tx,
-        },
-        {
-          onSuccess: () => {
-            console.log("Certificate transaction successful, calling onSuccess");
-            success("Certificate created successfully!");
-            onClose();
-            reset();
-            onSuccess?.();
-          },
-          onError: (transactionError: Error) => {
-            console.error("Transaction failed:", transactionError);
-            error("Transaction failed: " + transactionError.message);
-          }
-        }
-      );
+      await sponsorAndExecute({
+        tx,
+        suiClient,
+        signTransaction,
+        currentAccount,
+        allowedMoveCallTargets: [`${PACKAGE_ID}::profiles::create_certificate`],
+        allowedAddresses: [currentAccount.address],
+      });
+      console.log("Certificate transaction successful, calling onSuccess");
+      success("Certificate created successfully!");
+      onClose();
+      onSuccess?.();
+    } catch (transactionError: unknown) {
+      console.error("Transaction failed:", transactionError);
+      const errorMessage = transactionError instanceof Error ? transactionError.message : "Unknown error occurred";
+      error("Transaction failed: " + errorMessage);
     } finally {
       setIsSubmitting(false);
     }
